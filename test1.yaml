@@ -1,0 +1,15 @@
+execution:
+  scenario: my_scenario
+
+scenarios:
+  my_scenario:
+    script: https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx
+    properties:
+      threads: 20
+      rampUp: 60
+      duration: 600
+      tpm: 200
+
+reporting:
+  - module: csv
+    filename: results.csv
