@@ -1,9 +1,12 @@
----
 execution:
-- executor: exec
-  scenario:
-    script: jmeter -n -t https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx -Jthreads=20 -JrampUp=60 -JloopCount=-1 -Jduration=600 -Jtpm=200 -l results/list_of_users_28062023.jtl
+  scenario: my_scenario
 
-- executor: shell
-  scenario:
-    script: tail -f nohup_list_of_users_28062023_200TPM_28062023.out
+scenarios:
+  my_scenario:
+    script: https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx
+    properties:
+      threads: ${__P(threads, 20)}
+      rampUp: ${__P(rampUp, 60)}
+      loopCount: -1
+      duration: 600
+      tpm: 200
