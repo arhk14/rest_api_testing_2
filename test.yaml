@@ -1,0 +1,10 @@
+execution:
+  concurrency: 10
+  ramp-up: 60s
+  hold-for: 10m
+  throughput: 200
+
+modules:
+  jmeter:
+    script: https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx
+
