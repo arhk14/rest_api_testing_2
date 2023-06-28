@@ -11,5 +11,7 @@ scenarios:
       tpm: 200
 
 reporting:
-  - module: csv
-    filename: results.csv
+  modules:
+    - final-stats
+  output-format: csv
+  report-file: results.csv
