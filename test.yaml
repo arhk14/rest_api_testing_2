@@ -5,8 +5,8 @@ scenarios:
   my_scenario:
     script: https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx
     properties:
-      threads: ${__P(threads, 20)}
-      rampUp: ${__P(rampUp, 60)}
-      loopCount: -1
+      threads: 20
+      rampUp: 60
       duration: 600
       tpm: 200
+
