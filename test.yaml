@@ -1,10 +1,9 @@
+---
 execution:
-  concurrency: 10
-  ramp-up: 60s
-  hold-for: 10m
-  throughput: 200
+- executor: exec
+  scenario:
+    script: jmeter -n -t https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx -Jthreads=20 -JrampUp=60 -JloopCount=-1 -Jduration=600 -Jtpm=200 -l results/list_of_users_28062023.jtl
 
-modules:
-  jmeter:
-    script: https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx
-
+- executor: shell
+  scenario:
+    script: tail -f nohup_list_of_users_28062023_200TPM_28062023.out
