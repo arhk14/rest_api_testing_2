@@ -32,13 +32,13 @@ pipeline {
                 ])
 
                 // Execute your JMeter script using the workspace path and updated parameters
-                sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx \
+                sh "jmeter -n -t list_of_users_28062023.jmx \
                     -Jthreads=${params.NUMBER_OF_THREADS} \
                     -Jrampup=${params.RAMP_UP} \
                     -Jloops=${params.LOOP_COUNT} \
                     -Jduration=${params.DURATION} \
                     -Jtps=${params.TPS} \
-                    -l ${WORKSPACE}/results.jtl"
+                    -l results.jtl"
             }
         }
     }
@@ -46,7 +46,7 @@ pipeline {
     post {
         always {
             // Archive the JTL result file for later reference
-            archiveArtifacts artifacts: '${WORKSPACE}/results.jtl', onlyIfSuccessful: false
+            archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
         }
     }
 }
