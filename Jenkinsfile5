@@ -41,8 +41,9 @@ pipeline {
         }
 
         success {
-            // Generate a comprehensive performance report using the Performance Plugin
-            perfReport parsers: [[$class: 'JMeterParser', glob: 'results.jtl']]
+            // Generate a performance report using the Performance Publisher
+            step([$class: 'PerformancePublisher', sourceDataFiles: 'results.jtl', 
+                  parserConfigs: [[parserName: 'JMeterParser', glob: 'results.jtl']]])
 
             // Send email notification with JMeter test results
             emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
