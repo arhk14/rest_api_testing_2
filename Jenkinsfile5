@@ -47,16 +47,17 @@ pipeline {
         always {
             // Archive the JTL result file for later reference
             archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
-
-            // Generate a comprehensive performance report using the Performance Plugin
-            perfReport([parseJMeter('${WORKSPACE}/results.jtl')])
         }
 
         success {
-            // Send email notification with JMeter test results
+            // Generate a comprehensive performance report using the Performance Plugin
+            step([$class: 'ArtifactArchiver', artifacts: 'results.jtl', allowEmptyArchive: true])
+            perfReport parsers: [[$class: 'JMeterParser', glob: 'results.jtl']]
+
+            // Send email notification with JMeter test results and performance report
             emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
-                body: "Please find the attached JMeter test results.",
-                attachmentsPattern: "results.jtl",
+                body: "Please find the attached JMeter test results and performance report.",
+                attachmentsPattern: "results.jtl,performance-reports/**/*",
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']]
         }
