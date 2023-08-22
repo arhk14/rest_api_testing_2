@@ -31,13 +31,18 @@ pipeline {
                     -Jtps=${params.TPS} \
                     -l ${reportFolder}/results.jtl"
                 
-                sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
-                
+                // Store the reportFolder as an environment variable to make it accessible in other stages
+                env.REPORT_FOLDER = reportFolder
+            }
+        }
+
+        stage('Publish HTML Report') {
+            steps {
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: false,
                     keepAll: true,
-                    reportDir: "${reportFolder}",
+                    reportDir: env.REPORT_FOLDER, // Access the stored variable
                     reportFiles: 'index.html',
                     reportName: 'JMeter HTML Report'
                 ])
