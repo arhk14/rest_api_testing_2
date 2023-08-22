@@ -37,11 +37,7 @@ pipeline {
 
                 // Generate the HTML report
                 sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
-            }
-        }
 
-        stage('Publish HTML Report') {
-            steps {
                 // Publish the HTML report using the HTML Publisher plugin
                 publishHTML(target: [
                     allowMissing: false,
