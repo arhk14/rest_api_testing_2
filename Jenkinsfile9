@@ -1,31 +1,53 @@
-node {
-    def NUMBER_OF_THREADS = '10'
-    def RAMP_UP = '5'
-    def LOOP_COUNT = '1'
-    def DURATION = '60'
-    def TPS = '10'
+pipeline {
+    agent any
 
-    stage('Checkout') {
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: 'https://github.com/arhk14/rest_api_testing_2.git']]])
+    parameters {
+        string(name: 'NUMBER_OF_THREADS', defaultValue: '10', description: 'Number of threads')
+        string(name: 'RAMP_UP', defaultValue: '5', description: 'Ramp-up period (in seconds)')
+        string(name: 'LOOP_COUNT', defaultValue: '1', description: 'Loop count')
+        string(name: 'DURATION', defaultValue: '60', description: 'Test duration (in seconds)')
+        string(name: 'TPS', defaultValue: '10', description: 'Transactions per second (TPS)')
     }
 
-    stage('Run JMeter') {
-        def buildNumber = currentBuild.number
-        def reportFolder = "jmeter-report-${buildNumber}"
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the code from your GitHub repository
+                git url: 'https://github.com/arhk14/rest_api_testing_2.git', credentialsId: 'Git_Authentication'
+            }
+        }
 
-        sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
-        sh "mkdir -p ${reportFolder}"
-        sh "jmeter -n -t list_of_users_28062023.jmx \
-            -Jthreads=${NUMBER_OF_THREADS} \
-            -Jrampup=${RAMP_UP} \
-            -Jloops=${LOOP_COUNT} \
-            -Jduration=${DURATION} \
-            -Jtps=${TPS} \
-            -l ${reportFolder}/results.jtl"
+        stage('Run JMeter') {
+            steps {
+                // Download the JMeter script from the repository
+                sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
 
-        sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
+                // Create a timestamp for the report folder
+                def timestamp = new Date().format('yyyyMMdd_HHmmss')
+                def reportFolder = "jmeter-report-${timestamp}"
 
-        step([$class: 'PublishHTMLStep', allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
-            reportDir: "${reportFolder}", reportFiles: 'index.html', reportName: 'JMeter HTML Report'])
+                // Execute your JMeter script using the workspace path and updated parameters
+                sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx \
+                    -Jthreads=${params.NUMBER_OF_THREADS} \
+                    -Jrampup=${params.RAMP_UP} \
+                    -Jloops=${params.LOOP_COUNT} \
+                    -Jduration=${params.DURATION} \
+                    -Jtps=${params.TPS} \
+                    -l ${reportFolder}/results.jtl"
+
+                // Generate the HTML report
+                sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
+
+                // Publish the HTML report using the HTML Publisher plugin
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: "${reportFolder}",
+                    reportFiles: 'index.html',
+                    reportName: 'JMeter HTML Report'
+                ])
+            }
+        }
     }
 }
