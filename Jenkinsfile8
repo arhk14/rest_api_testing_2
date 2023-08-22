@@ -22,34 +22,36 @@ pipeline {
                 // Download the JMeter script from the repository
                 sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
 
-                // Execute JMeter test and generate HTML report in a unique folder
+                // Create a timestamp for the report folder
                 def timestamp = new Date().format('yyyyMMdd_HHmmss')
                 def reportFolder = "jmeter-report-${timestamp}"
+
+                // Execute your JMeter script using the workspace path and updated parameters
                 sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx \
                     -Jthreads=${params.NUMBER_OF_THREADS} \
                     -Jrampup=${params.RAMP_UP} \
                     -Jloops=${params.LOOP_COUNT} \
                     -Jduration=${params.DURATION} \
                     -Jtps=${params.TPS} \
-                    -l results.jtl \
-                    -e -o ${reportFolder}"
+                    -l ${reportFolder}/results.jtl"
+
+                // Generate the HTML report
+                sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
             }
         }
-    }
 
-    post {
-        always {
-            // Archive the JTL result file for later reference
-            archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
-        }
-
-        success {
-            // Send email notification with JMeter test results
-            emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
-                body: "Please find the attached JMeter test results.",
-                attachmentsPattern: "results.jtl",
-                to: "akshayrhegde18@gmail.com",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+        stage('Publish HTML Report') {
+            steps {
+                // Publish the HTML report using the HTML Publisher plugin
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: "${reportFolder}",
+                    reportFiles: 'index.html',
+                    reportName: 'JMeter HTML Report'
+                ])
+            }
         }
     }
 }
