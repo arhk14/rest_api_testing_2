@@ -18,34 +18,37 @@ pipeline {
 
         stage('Run JMeter') {
             steps {
-                sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
-                
-                def timestamp = new Date().format('yyyyMMdd_HHmmss')
-                def reportFolder = "jmeter-report-${timestamp}"
-                
-                sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx " +
-                    "-Jthreads=${params.NUMBER_OF_THREADS} " +
-                    "-Jrampup=${params.RAMP_UP} " +
-                    "-Jloops=${params.LOOP_COUNT} " +
-                    "-Jduration=${params.DURATION} " +
-                    "-Jtps=${params.TPS} " +
-                    "-l ${reportFolder}/results.jtl"
-                
-                // Store the reportFolder as an environment variable to make it accessible in other stages
-                env.REPORT_FOLDER = reportFolder
+                script {
+                    sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
+                    
+                    def timestamp = new Date().format('yyyyMMdd_HHmmss')
+                    def reportFolder = "jmeter-report-${timestamp}"
+                    
+                    sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx " +
+                        "-Jthreads=${params.NUMBER_OF_THREADS} " +
+                        "-Jrampup=${params.RAMP_UP} " +
+                        "-Jloops=${params.LOOP_COUNT} " +
+                        "-Jduration=${params.DURATION} " +
+                        "-Jtps=${params.TPS} " +
+                        "-l ${reportFolder}/results.jtl"
+                    
+                    env.REPORT_FOLDER = reportFolder
+                }
             }
         }
 
         stage('Publish HTML Report') {
             steps {
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: env.REPORT_FOLDER,
-                    reportFiles: 'index.html',
-                    reportName: 'JMeter HTML Report'
-                ])
+                script {
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: env.REPORT_FOLDER,
+                        reportFiles: 'index.html',
+                        reportName: 'JMeter HTML Report'
+                    ])
+                }
             }
         }
     }
