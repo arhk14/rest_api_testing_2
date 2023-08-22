@@ -32,11 +32,7 @@ pipeline {
                     -l ${reportFolder}/results.jtl"
                 
                 sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
-            }
-        }
-
-        stage('Publish HTML Report') {
-            steps {
+                
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: false,
