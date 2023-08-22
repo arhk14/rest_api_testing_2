@@ -21,12 +21,13 @@ pipeline {
             steps {
                 // Download the JMeter script from the repository
                 sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
-                
+
                 // Create a timestamp for the report folder
                 def timestamp = new Date().format('yyyyMMdd_HHmmss')
                 def reportFolder = "jmeter-report-${timestamp}"
 
                 // Execute your JMeter script using the workspace path and updated parameters
+                sh "mkdir -p ${reportFolder}"
                 sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx \
                     -Jthreads=${params.NUMBER_OF_THREADS} \
                     -Jrampup=${params.RAMP_UP} \
