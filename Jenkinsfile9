@@ -1,0 +1,31 @@
+node {
+    def NUMBER_OF_THREADS = '10'
+    def RAMP_UP = '5'
+    def LOOP_COUNT = '1'
+    def DURATION = '60'
+    def TPS = '10'
+
+    stage('Checkout') {
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: 'https://github.com/arhk14/rest_api_testing_2.git']]])
+    }
+
+    stage('Run JMeter') {
+        def timestamp = new Date().format('yyyyMMdd_HHmmss')
+        def reportFolder = "jmeter-report-${timestamp}"
+
+        sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
+        sh "mkdir -p ${reportFolder}"
+        sh "jmeter -n -t list_of_users_28062023.jmx \
+            -Jthreads=${NUMBER_OF_THREADS} \
+            -Jrampup=${RAMP_UP} \
+            -Jloops=${LOOP_COUNT} \
+            -Jduration=${DURATION} \
+            -Jtps=${TPS} \
+            -l ${reportFolder}/results.jtl"
+
+        sh "jmeter -g ${reportFolder}/results.jtl -o ${reportFolder}"
+
+        step([$class: 'PublishHTMLStep', allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true,
+            reportDir: "${reportFolder}", reportFiles: 'index.html', reportName: 'JMeter HTML Report'])
+    }
+}
