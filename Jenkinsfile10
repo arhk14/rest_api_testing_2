@@ -42,7 +42,7 @@ pipeline {
             steps {
                 script {
                     sh "mkdir -p jmeter-report-backup"
-                    sh "mv jmeter-report/content/* jmeter-report/index.html jmeter-report/sbadmin2-1.0.7 jmeter-report/statistics.json jmeter-report-backup/"
+                    sh "mv jmeter-report/content/css jmeter-report/content/js jmeter-report/content/pages jmeter-report/index.html jmeter-report/sbadmin2-1.0.7 jmeter-report/statistics.json jmeter-report-backup/"
                     sh "jmeter -g results.jtl -o jmeter-report"
                     archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
                 }
