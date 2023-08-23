@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'NUMBER_OF_THREADS', defaultValue: '10', description: 'Number of threads')
+        string(name: 'RAMP_UP', defaultValue: '5', description: 'Ramp-up period (in seconds)')
+        string(name: 'LOOP_COUNT', defaultValue: '1', description: 'Loop count')
+        string(name: 'DURATION', defaultValue: '60', description: 'Test duration (in seconds)')
+        string(name: 'TPS', defaultValue: '10', description: 'Transactions per second (TPS)')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/arhk14/rest_api_testing_2.git', credentialsId: 'Git_Authentication'
+            }
+        }
+
+        stage('Run JMeter') {
+            steps {
+                sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx'
+
+                input(message: 'Proceed with the JMeter test?', parameters: [
+                    string(name: 'NUMBER_OF_THREADS', defaultValue: params.NUMBER_OF_THREADS, description: 'Number of threads'),
+                    string(name: 'RAMP_UP', defaultValue: params.RAMP_UP, description: 'Ramp-up period (in seconds)'),
+                    string(name: 'LOOP_COUNT', defaultValue: params.LOOP_COUNT, description: 'Loop count'),
+                    string(name: 'DURATION', defaultValue: params.DURATION, description: 'Test duration (in seconds)'),
+                    string(name: 'TPS', defaultValue: params.TPS, description: 'Transactions per second (TPS)')
+                ])
+
+                sh "jmeter -n -t ${WORKSPACE}/list_of_users_28062023.jmx \
+                    -Jthreads=${params.NUMBER_OF_THREADS} \
+                    -Jrampup=${params.RAMP_UP} \
+                    -Jloops=${params.LOOP_COUNT} \
+                    -Jduration=${params.DURATION} \
+                    -Jtps=${params.TPS} \
+                    -l results.jtl"
+            }
+        }
+
+        stage('Generate JMeter Reports') {
+            steps {
+                script {
+                    sh "mkdir -p jmeter-report-backup"
+                    sh "mv jmeter-report/* jmeter-report-backup/"
+                    sh "jmeter -g results.jtl -o jmeter-report"
+                    archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
+        }
+
+        success {
+            emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
+                body: "Please find the attached JMeter test results and performance report.",
+                attachmentsPattern: "results.jtl,jmeter-report/**/*",
+                to: "akshayrhegde18@gmail.com",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+
+            publishHTML(target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'jmeter-report',
+                reportFiles: 'index.html',
+                reportName: 'JMeter HTML Report'
+            ])
+        }
+    }
+}
