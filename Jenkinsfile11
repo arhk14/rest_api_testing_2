@@ -24,7 +24,7 @@ stages {
                 def timestamp = new Date().format('yyyyMMdd_HHmmss')
                 def reportFolder = "jmeter-report-${timestamp}"
                 
-                sh "jmeter -n -t `{jobs}/list_of_users_28062023.jmx` " +
+                sh "jmeter -n -t `{WORKSPACE}/list_of_users_28062023.jmx` " +
 "-Jthreads=params.NUMBER_OF_THREADS"+
 "−Jrampup={params.RAMP_UP} " +
 "-Jloops=params.LOOP_COUNT"+
