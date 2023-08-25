@@ -39,17 +39,22 @@ pipeline {
         }
 
         stage('Generate JMeter Reports') {
-    steps {
-        script {
-            sh "mkdir -p jmeter-report-backup"
-            sh "rm -rf jmeter-report/*" // Delete contents of the jmeter-report directory
-            sh "mv jmeter-report/* jmeter-report-backup/"
-            sh "jmeter -g results.jtl -o jmeter-report"
-            archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
-        }
-    }
-}
+            steps {
+                script {
+                    sh "mkdir -p jmeter-report"
+                    sh "jmeter -g results.jtl -o jmeter-report"
 
+                    if (fileExists("jmeter-report-backup")) {
+                        sh "rm -rf jmeter-report-backup/*"
+                    } else {
+                        sh "mkdir -p jmeter-report-backup"
+                    }
+
+                    sh "mv jmeter-report/* jmeter-report-backup/"
+                    archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
+                }
+            }
+        }
     }
 
     post {
@@ -60,7 +65,7 @@ pipeline {
         success {
             emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
                 body: "Please find the attached JMeter test results and performance report.",
-                attachmentsPattern: "results.jtl,jmeter-report/**/*",
+                attachmentsPattern: "results.jtl,jmeter-report-backup/**/*",
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']]
 
