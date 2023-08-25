@@ -24,12 +24,12 @@ stages {
                 def timestamp = new Date().format('yyyyMMdd_HHmmss')
                 def reportFolder = "jmeter-report-${timestamp}"
                 
-                sh "jmeter -n -t <span class="math-inline">\{WORKSPACE\}/list\_of\_users\_28062023\.jmx " \+
-"-Jthreads={params.NUMBER_OF_THREADS} " +
-"-Jrampup=params.RAMPUP"+
-"−Jloops={params.LOOP_COUNT} " +
-"-Jduration=params.DURATION"+
-"−Jtps={params.TPS} " +
+                sh "jmeter -n -t `{WORKSPACE}/list_of_users_28062023.jmx` " +
+"-Jthreads=params.NUMBER_OF_THREADS"+
+"−Jrampup={params.RAMP_UP} " +
+"-Jloops=params.LOOP_COUNT"+
+"−Jduration={params.DURATION} " +
+"-Jtps=${params.TPS} " +
 "-l ${reportFolder}/results.jtl"
 
                 sh "perfReport ${reportFolder}/results.jtl"
