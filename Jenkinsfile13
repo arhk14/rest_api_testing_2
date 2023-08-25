@@ -41,7 +41,7 @@ pipeline {
         stage('Generate JMeter Reports') {
             steps {
                 script {
-                    sh "rm -rf jmeter-report/*"
+                    sh "mkdir -p jmeter-report"
                     sh "jmeter -g results.jtl -o jmeter-report"
                 }
             }
@@ -59,6 +59,15 @@ pipeline {
                 attachmentsPattern: "results.jtl,jmeter-report/**/*",
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            
+            publishHTML(target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'jmeter-report',
+                reportFiles: 'index.html',
+                reportName: 'JMeter HTML Report'
+            ])
         }
     }
 }
