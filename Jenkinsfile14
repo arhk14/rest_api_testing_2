@@ -37,23 +37,23 @@ pipeline {
                     -l results.jtl"
             }
         }
-    }
-}
 
-post {
-    always {
-        archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
-    }
-
-    success {
-        emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
-            body: "Please find the attached JMeter test results.",
-            attachmentsPattern: "results.jtl",
-            to: "akshayrhegde18@gmail.com",
-            recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-    }
+        post {
+            always {
+                archiveArtifacts artifacts: 'results.jtl', onlyIfSuccessful: false
+            }
     
-    success {
-        performanceReport parsers: [[$class: 'JMeterParser', glob: 'results.jtl']]
+            success {
+                emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
+                    body: "Please find the attached JMeter test results.",
+                    attachmentsPattern: "results.jtl",
+                    to: "akshayrhegde18@gmail.com",
+                    recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            }
+            
+            success {
+                performanceReport parsers: [[$class: 'JMeterParser', glob: 'results.jtl']]
+            }
+        }
     }
 }
