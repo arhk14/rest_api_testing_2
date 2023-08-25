@@ -41,8 +41,10 @@ pipeline {
         stage('Generate JMeter Reports') {
             steps {
                 script {
-                    sh "mkdir -p jmeter-report"
-                    sh "jmeter -g results.jtl -o jmeter-report"
+                    def buildNumber = env.BUILD_NUMBER
+                    def reportFolder = "jmeter-report-${buildNumber}"
+                    sh "mkdir -p ${reportFolder}"
+                    sh "jmeter -g results.jtl -o ${reportFolder}"
                 }
             }
         }
@@ -56,7 +58,7 @@ pipeline {
         success {
             emailext subject: "JMeter Test Results - Build #${BUILD_NUMBER}",
                 body: "Please find the attached JMeter test results and performance report.",
-                attachmentsPattern: "results.jtl,jmeter-report/**/*",
+                attachmentsPattern: "results.jtl,jmeter-report-*/*",
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']]
             
@@ -64,7 +66,7 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'jmeter-report',
+                reportDir: "jmeter-report-${BUILD_NUMBER}",
                 reportFiles: 'index.html',
                 reportName: 'JMeter HTML Report'
             ])
