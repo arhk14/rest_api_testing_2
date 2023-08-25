@@ -51,8 +51,7 @@ pipeline {
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']]
             
-            performanceReport parsers: [[$class: 'JUnitParser', glob: 'results.jtl']],
-                reportFileNamePattern: '**/*.xml'
+            performanceReport parsers: [[$class: 'JMeterParser', glob: 'results.jtl']]
         }
     }
 }
