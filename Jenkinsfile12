@@ -39,15 +39,17 @@ pipeline {
         }
 
         stage('Generate JMeter Reports') {
-            steps {
-                script {
-                    sh "mkdir -p jmeter-report-backup"
-                    sh "mv jmeter-report jmeter-report-backup/"
-                    sh "jmeter -g results.jtl -o jmeter-report"
-                    archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
-                }
-            }
+    steps {
+        script {
+            sh "mkdir -p jmeter-report-backup"
+            sh "rm -rf jmeter-report/*" // Delete contents of the jmeter-report directory
+            sh "mv jmeter-report/* jmeter-report-backup/"
+            sh "jmeter -g results.jtl -o jmeter-report"
+            archiveArtifacts artifacts: 'jmeter-report/**', onlyIfSuccessful: false
         }
+    }
+}
+
     }
 
     post {
