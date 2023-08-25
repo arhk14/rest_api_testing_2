@@ -26,11 +26,10 @@ stages {
                 
                 sh "jmeter -n -t <span class="math-inline">\{WORKSPACE\}/list\_of\_users\_28062023\.jmx " \+
 "-Jthreads={params.NUMBER_OF_THREADS} " +
-"-Jrampup=params.RAMP 
-U
-​
- P"+"−Jloops={params.LOOP_COUNT} " +
-"-Jduration=params.DURATION"+"−Jtps={params.TPS} " +
+"-Jrampup=params.RAMPUP"+
+"−Jloops={params.LOOP_COUNT} " +
+"-Jduration=params.DURATION"+
+"−Jtps={params.TPS} " +
 "-l ${reportFolder}/results.jtl"
 
                 sh "perfReport ${reportFolder}/results.jtl"
