@@ -51,9 +51,7 @@ pipeline {
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                 replyTo: "\${DEFAULT_REPLYTO}"
-        }
-
-        success {
+            
             step([
                 $class: 'PerformancePublisher',
                 sourceDataFiles: 'results.jtl',
