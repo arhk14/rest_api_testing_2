@@ -51,8 +51,17 @@ pipeline {
                 to: "akshayrhegde18@gmail.com",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                 replyTo: "\${DEFAULT_REPLYTO}"
-            
-            performanceReport parsers: [[$class: 'JMeterParser', glob: '**/*.jtl']]
+        }
+
+        success {
+            step([
+                $class: 'PerformancePublisher',
+                sourceDataFiles: 'results.jtl',
+                parsers: [[
+                    $class: 'JMeterParser',
+                    glob: '**/*.jtl'
+                ]]
+            ])
         }
     }
 }
