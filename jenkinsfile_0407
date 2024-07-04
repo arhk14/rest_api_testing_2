@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'threads', defaultValue: '1', description: 'Number of threads')
+        string(name: 'rampup', defaultValue: '30', description: 'Ramp-up period in seconds')
+        string(name: 'loopcount', defaultValue: '-1', description: 'Loop count')
+        string(name: 'duration', defaultValue: '60', description: 'Duration in seconds')
+        string(name: 'throughput', defaultValue: '2', description: 'Throughput')
+    }
+
+    environment {
+        // Ensure the parameters are treated as integers
+        threads = "${params.threads}"
+        rampup = "${params.rampup}"
+        loopcount = "${params.loopcount}"
+        duration = "${params.duration}"
+        throughput = "${params.throughput}"
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    threads = sh(script: 'expr "$threads" + 0', returnStdout: true).trim()
+                    rampup = sh(script: 'expr "$rampup" + 0', returnStdout: true).trim()
+                    loopcount = sh(script: 'expr "$loopcount" + 0', returnStdout: true).trim()
+                    duration = sh(script: 'expr "$duration" + 0', returnStdout: true).trim()
+                    throughput = sh(script: 'expr "$throughput" + 0', returnStdout: true).trim()
+                }
+            }
+        }
+
+        stage('Download JMeter Test Plan') {
+            steps {
+                sh 'wget https://github.com/arhk14/rest_api_testing_2/raw/master/list_of_users_28062023.jmx -O list_of_users_28062023.jmx'
+            }
+        }
+
+        stage('Run JMeter') {
+            steps {
+                sh '''jmeter -n -t list_of_users_28062023.jmx -Jthreads=$threads -Jrampup=$rampup -Jloopcount=$loopcount -Jduration=$duration -Jthroughput=$throughput -l results.jtl'''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'results.jtl', allowEmptyArchive: true
+        }
+    }
+}
+
